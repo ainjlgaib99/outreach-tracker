@@ -577,6 +577,7 @@ function render() {
 // ─── INIT ─────────────────────────────────────────────────────────────────────
 async function init() {
   await DB.init();
+  if (!ls('ot_webhook')) ls('ot_webhook', 'https://ainjlgaib.app.n8n.cloud/webhook/outreach-sync');
   await loadEntries();
   window.addEventListener('online', async () => { await Sync.flush(); render(); });
   window.addEventListener('offline', () => render());
