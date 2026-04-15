@@ -181,18 +181,35 @@ const Sync = (() => {
 
   const fire = async payload => {
     const url = ls('ot_webhook');
-    if (!url) return true;
+    if (!url) return {ok: true, data: null};
     try {
       const r = await fetch(url, {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload)});
-      return r.ok;
-    } catch { return false; }
+      const data = r.ok ? await r.json().catch(()=>null) : null;
+      return {ok: r.ok, data};
+    } catch { return {ok: false, data: null}; }
   };
 
   const send = async (entry, action='create') => {
-    const payload = {action, ...entry};
+    const payload = {
+      action,
+      id: entry.id,
+      name: entry.name,
+      platform: entry.platform,
+      type: entry.type,
+      date: entry.date,
+      status: entry.status,
+      note: entry.note || '',
+      followUpDate: entry.followUpDate || '',
+      airtableId: entry.airtableId || '',
+      updatedAt: entry.updatedAt
+    };
     if (!navigator.onLine) { const q=getQ(); q.push(payload); saveQ(q); updateSyncStatus(); return; }
-    const ok = await fire(payload);
+    const {ok, data} = await fire(payload);
     if (!ok) { const q=getQ(); q.push(payload); saveQ(q); }
+    else if (action === 'create' && data?.airtableId) {
+      entry.airtableId = data.airtableId;
+      await DB.put(entry);
+    }
     updateSyncStatus();
   };
 
