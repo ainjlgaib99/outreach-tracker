@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#0a0a0f">
+<link rel="manifest" href="manifest.json">
+<title>Outreach</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0a0a0f;--sf:#12121a;--sf2:#1a1a25;--bd:#2a2a3a;--tx:#e8e8f0;--dim:#8888a0;--ac:#44aaff;--grn:#4ade80;--red:#f87171;--ylw:#fbbf24;--pur:#a78bfa;--mono:'Space Mono',monospace;--sans:'DM Sans',sans-serif;--sb:env(safe-area-inset-bottom,0px)}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;overflow:hidden}
+body{font-family:var(--sans);background:var(--bg);color:var(--tx);-webkit-font-smoothing:antialiased}
+button{cursor:pointer;border:none;font-family:var(--sans);background:none;color:inherit}
+button:active{opacity:.65}
+input,textarea,select{font-family:var(--sans)}
+::-webkit-scrollbar{width:3px}::-webkit-scrollbar-thumb{background:var(--bd)}
+
+.app{height:100vh;height:100dvh;display:flex;flex-direction:column}
+.hdr{background:var(--sf);border-bottom:1px solid var(--bd);padding:12px 16px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.hdr-title{font-family:var(--mono);font-size:13px;letter-spacing:3px;color:var(--ac)}
+.hdr-sync{font-size:9px;color:var(--dim);display:flex;align-items:center;gap:5px}
+.sync-dot{width:6px;height:6px;border-radius:50%;background:var(--grn)}
+.sync-dot.off{background:var(--ylw)}
+
+.cnt{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch}
+
+.tabs{background:var(--sf);border-top:1px solid var(--bd);display:flex;flex-shrink:0;padding-bottom:var(--sb)}
+.tb{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 0;font-size:9px;letter-spacing:1px;color:var(--dim);position:relative}
+.tb.on{color:var(--ac)}
+.tb i{font-size:18px;font-style:normal;line-height:1}
+.tb-badge{position:absolute;top:4px;right:calc(50% - 20px);min-width:14px;height:14px;background:var(--red);color:#fff;font-size:8px;border-radius:7px;display:flex;align-items:center;justify-content:center;padding:0 3px;font-family:var(--mono)}
+
+.pd{padding:16px}
+.sec{font-family:var(--mono);font-size:9px;letter-spacing:2px;color:var(--ac);margin-bottom:12px;text-transform:uppercase}
+.empty{text-align:center;padding:48px 16px;color:var(--dim);font-size:14px;line-height:2}
+
+/* Counter bar */
+.cbar{background:var(--sf);border-bottom:1px solid var(--bd);padding:10px 16px;display:flex;gap:0;flex-shrink:0}
+.ci{flex:1;padding:0 8px}
+.ci:first-child{padding-left:0;border-right:1px solid var(--bd)}
+.ci-label{font-size:9px;letter-spacing:2px;color:var(--dim);text-transform:uppercase;display:block;margin-bottom:2px}
+.ci-val{font-family:var(--mono);font-size:22px;font-weight:700;display:block}
+.ci-val.hit{color:var(--grn)}
+.ci-val.mid{color:var(--ac)}
+
+/* Form */
+.field{margin-bottom:16px}
+.field label{display:block;font-size:10px;color:var(--dim);letter-spacing:1px;margin-bottom:8px;text-transform:uppercase}
+.inp{width:100%;background:var(--sf);border:1px solid var(--bd);color:var(--tx);padding:13px 14px;font-size:15px;border-radius:10px;outline:none;-webkit-appearance:none}
+.inp:focus{border-color:var(--ac)}
+textarea.inp{min-height:72px;resize:none}
+
+/* Grid selectors */
+.gsel{display:grid;gap:8px}
+.gsel.pf{grid-template-columns:repeat(4,1fr)}
+.gsel.ty{grid-template-columns:repeat(2,1fr)}
+.sbtn{padding:11px 4px;background:var(--sf);border:1px solid var(--bd);color:var(--dim);border-radius:8px;font-size:11px;text-align:center;min-height:44px}
+.sbtn.on{background:rgba(68,170,255,.12);border-color:var(--ac);color:var(--ac);font-weight:600}
+
+/* Log button */
+.btn-log{width:100%;padding:16px;font-size:15px;font-weight:700;background:var(--ac);color:#0a0a0f;border-radius:12px;margin-top:8px;letter-spacing:.5px}
+.btn-log.done{background:var(--grn)}
+
+/* Filters */
+.filters{display:flex;gap:8px;overflow-x:auto;padding:12px 16px;-webkit-overflow-scrolling:touch;flex-shrink:0}
+.filters::-webkit-scrollbar{height:0}
+.fpill{padding:7px 14px;border-radius:20px;font-size:11px;white-space:nowrap;border:1px solid var(--bd);color:var(--dim);background:var(--sf);flex-shrink:0;min-height:34px}
+.fpill.on{border-color:var(--ac);color:var(--ac);background:rgba(68,170,255,.08)}
+
+/* Entry card */
+.entry{background:var(--sf);border:1px solid var(--bd);border-radius:10px;padding:13px 14px;margin-bottom:8px}
+.entry.fu{border-left:3px solid var(--ylw)}
+.entry.ufu{border-left:3px solid var(--red)}
+.e-top{display:flex;align-items:center;gap:8px;margin-bottom:4px}
+.e-name{font-size:15px;font-weight:600;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.e-del{font-size:14px;color:var(--dim);padding:6px;min-width:36px;min-height:36px;display:flex;align-items:center;justify-content:center}
+.e-meta{font-size:11px;color:var(--dim);margin-bottom:8px}
+.e-note{font-size:11px;color:var(--dim);font-style:italic;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:8px}
+.e-bot{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.schip{font-size:10px;padding:5px 12px;border-radius:20px;font-family:var(--mono);letter-spacing:.5px;min-height:32px}
+.fu-flag{font-size:10px;display:flex;align-items:center;gap:4px}
+
+/* Dashboard */
+.prog-row{margin-bottom:14px}
+.prog-head{display:flex;justify-content:space-between;font-size:11px;color:var(--dim);margin-bottom:6px}
+.prog-head b{color:var(--tx);font-weight:600}
+.pbar{height:8px;background:var(--bd);border-radius:4px;overflow:hidden}
+.pbar div{height:100%;border-radius:4px;transition:width .4s}
+
+.stat-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:16px}
+.scard{background:var(--sf);border:1px solid var(--bd);border-radius:10px;padding:14px}
+.scard em{font-family:var(--mono);font-size:28px;font-weight:700;font-style:normal;display:block;line-height:1.1}
+.scard small{font-size:10px;color:var(--dim);letter-spacing:1px;text-transform:uppercase;margin-top:4px;display:block}
+
+.wbars{display:flex;flex-direction:column;gap:10px}
+.wbar{display:flex;align-items:center;gap:10px}
+.wbar-label{font-size:10px;color:var(--dim);font-family:var(--mono);min-width:64px}
+.wbar-track{flex:1;height:20px;background:var(--bd);border-radius:4px;overflow:hidden}
+.wbar-fill{height:100%;border-radius:4px;background:var(--ac);opacity:.75;transition:width .4s}
+.wbar-num{font-size:11px;color:var(--dim);font-family:var(--mono);min-width:20px;text-align:right}
+
+/* Templates */
+.tpl{background:var(--sf);border:1px solid var(--bd);border-radius:10px;padding:14px;margin-bottom:12px}
+.tpl-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.tpl-label{font-family:var(--mono);font-size:10px;letter-spacing:2px;color:var(--ac);text-transform:uppercase}
+.tpl-copy{font-size:12px;padding:6px 16px;background:rgba(68,170,255,.1);border:1px solid rgba(68,170,255,.3);color:var(--ac);border-radius:6px}
+.tpl-text{font-size:13px;color:var(--dim);line-height:1.7;resize:none;border:none;background:transparent;width:100%;outline:none}
+
+/* Settings */
+.srow{background:var(--sf);border:1px solid var(--bd);border-radius:10px;padding:14px;margin-bottom:10px}
+.srow-label{font-size:10px;color:var(--dim);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px;display:block}
+.srow-inp{width:100%;background:transparent;border:none;color:var(--tx);font-size:14px;outline:none}
+.btn-danger{width:100%;padding:14px;font-size:14px;background:rgba(241,87,87,.08);border:1px solid rgba(241,87,87,.25);color:var(--red);border-radius:10px;margin-top:4px}
+
+/* Toast */
+#toast{position:fixed;bottom:calc(72px + var(--sb));left:50%;transform:translateX(-50%) translateY(10px);background:var(--sf2);border:1px solid var(--bd);color:var(--tx);padding:10px 20px;border-radius:20px;font-size:13px;opacity:0;transition:opacity .2s,transform .2s;z-index:999;pointer-events:none;white-space:nowrap}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="hdr">
+    <span class="hdr-title">OUTREACH</span>
+    <span class="hdr-sync" id="sync-status">
+      <span class="sync-dot" id="sync-dot"></span>
+      <span id="sync-label">online</span>
+    </span>
+  </header>
+  <div class="cnt" id="cnt"></div>
+  <nav class="tabs" id="tabs"></nav>
+</div>
+<div id="toast"></div>
+<script>
+// ─── CONSTANTS ───────────────────────────────────────────────────────────────
+const PLATFORMS = ['Instagram','LinkedIn','Reddit','X','Upwork','Discord','Email'];
+const TYPES = ['Cold DM','Follow-up','Value Post','Proposal'];
+const STATUSES = ['Sent','Replied','Call Booked','Converted','Dead'];
+const SCOLS = {Sent:'#44aaff',Replied:'#fbbf24','Call Booked':'#a78bfa',Converted:'#4ade80',Dead:'#f87171'};
+const DAILY = () => parseInt(ls('ot_daily') || '3');
+const WEEKLY = () => parseInt(ls('ot_weekly') || '21');
+
+const DEFAULT_TPLS = [
+  {id:'cold', label:'Cold DM', text:`Hey [Name] 👋 Saw what you're building. I help businesses like yours automate the stuff eating your time — lead follow-up, reporting, data sync — using n8n + Airtable. Takes days, not months. Worth a quick look?`},
+  {id:'value', label:'Value-First', text:`Hey [Name] — just wrapped an automation project that cuts [process] from hours to minutes/week. If you're doing this manually, happy to walk you through how it works. No pitch, genuinely just sharing.`},
+  {id:'social', label:'Social Proof', text:`Hey [Name] — just finished a system for a [type of business] that was doing [task] by hand. Now it runs itself. Happy to show you what that could look like for your operation if it's relevant.`},
+  {id:'upwork', label:'Upwork Proposal', text:`I've read your project and built systems like this before. My process: scope → build in n8n → connect Airtable → test end-to-end → hand off documented. You don't touch code. Fixed price, delivered in [X] days. Ready to start.`}
+];
+
+// ─── LOCALSTORAGE ─────────────────────────────────────────────────────────────
+const ls = (k, v) => v === undefined ? localStorage.getItem(k) : localStorage.setItem(k, v);
+
+// ─── DATABASE ─────────────────────────────────────────────────────────────────
+const DB = (() => {
+  let db;
+  const init = () => new Promise((res,rej) => {
+    const r = indexedDB.open('outreach-tracker',1);
+    r.onupgradeneeded = e => {
+      const d = e.target.result;
+      if (!d.objectStoreNames.contains('entries'))
+        d.createObjectStore('entries',{keyPath:'id'});
+    };
+    r.onsuccess = e => { db = e.target.result; res(); };
+    r.onerror = rej;
+  });
+  const tx = (mode='readonly') => db.transaction('entries',mode).objectStore('entries');
+  const getAll = () => new Promise((res,rej) => { const r=tx().getAll(); r.onsuccess=e=>res(e.target.result||[]); r.onerror=rej; });
+  const put = e => new Promise((res,rej) => { const r=tx('readwrite').put(e); r.onsuccess=res; r.onerror=rej; });
+  const del = id => new Promise((res,rej) => { const r=tx('readwrite').delete(id); r.onsuccess=res; r.onerror=rej; });
+  return {init,getAll,put,del};
+})();
+
+// ─── SYNC ─────────────────────────────────────────────────────────────────────
+const Sync = (() => {
+  const QK = 'ot_queue';
+  const getQ = () => JSON.parse(ls(QK)||'[]');
+  const saveQ = q => ls(QK, JSON.stringify(q));
+
+  const fire = async payload => {
+    const url = ls('ot_webhook');
+    if (!url) return true;
+    try {
+      const r = await fetch(url, {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload)});
+      return r.ok;
+    } catch { return false; }
+  };
+
+  const send = async (entry, action='create') => {
+    const payload = {action, ...entry};
+    if (!navigator.onLine) { const q=getQ(); q.push(payload); saveQ(q); updateSyncStatus(); return; }
+    const ok = await fire(payload);
+    if (!ok) { const q=getQ(); q.push(payload); saveQ(q); }
+    updateSyncStatus();
+  };
+
+  const flush = async () => {
+    const q = getQ();
+    if (!q.length) return;
+    const failed = [];
+    for (const p of q) { if (!await fire(p)) failed.push(p); }
+    const synced = q.length - failed.length;
+    saveQ(failed);
+    if (synced > 0) toast(`Synced ${synced} queued`);
+    updateSyncStatus();
+  };
+
+  return {send, flush};
+})();
+
+function updateSyncStatus() {
+  const q = JSON.parse(ls('ot_queue')||'[]');
+  const online = navigator.onLine;
+  const dot = document.getElementById('sync-dot');
+  const label = document.getElementById('sync-label');
+  if (!dot) return;
+  if (!online) { dot.className='sync-dot off'; label.textContent='offline'; return; }
+  if (q.length) { dot.className='sync-dot off'; label.textContent=`${q.length} queued`; return; }
+  dot.className='sync-dot'; label.textContent='synced';
+}
+
+// ─── STATE ────────────────────────────────────────────────────────────────────
+const S = {
+  tab: 'add',
+  entries: [],
+  filter: 'all',
+  pf: '',   // selected platform
+  ty: '',   // selected type
+};
+
+const g = id => document.getElementById(id);
+const todayStr = () => new Date().toISOString().split('T')[0];
+const daysBetween = d => Math.floor((Date.now() - new Date(d+'T00:00:00').getTime()) / 86400000);
+const needsFollowUp = e => e.status==='Sent' && daysBetween(e.date)>=3;
+const isUrgent = e => e.status==='Sent' && daysBetween(e.date)>=7;
+const todayEntries = () => S.entries.filter(e=>e.date===todayStr());
+const weekStart = () => { const d=new Date(); d.setDate(d.getDate()-d.getDay()); return d.toISOString().split('T')[0]; };
+const weekEntries = () => S.entries.filter(e=>e.date>=weekStart());
+const followUpCount = () => S.entries.filter(needsFollowUp).length;
+
+let toastT;
+function toast(msg, ms=2200) {
+  const t = g('toast'); t.textContent=msg; t.classList.add('show');
+  clearTimeout(toastT); toastT=setTimeout(()=>t.classList.remove('show'),ms);
+}
+
+async function loadEntries() {
+  S.entries = await DB.getAll();
+  S.entries.sort((a,b)=>b.id-a.id);
+}
+
+async function addEntry(name, note) {
+  if (!name.trim()) { toast('Enter a name'); return; }
+  if (!S.pf) { toast('Pick a platform'); return; }
+  if (!S.ty) { toast('Pick a type'); return; }
+  const entry = {
+    id: Date.now().toString(),
+    name: name.trim(),
+    platform: S.pf,
+    type: S.ty,
+    date: todayStr(),
+    status: 'Sent',
+    note: note.trim(),
+    updatedAt: new Date().toISOString()
+  };
+  await DB.put(entry);
+  await Sync.send(entry,'create');
+  await loadEntries();
+  toast('✓ Logged!');
+  S.pf=''; S.ty='';
+  render();
+  // Scroll to top of content
+  g('cnt').scrollTop=0;
+}
+
+async function cycleStatus(id) {
+  const e = S.entries.find(x=>x.id===id);
+  if (!e) return;
+  const i = STATUSES.indexOf(e.status);
+  if (i >= STATUSES.length-1) return;
+  e.status = STATUSES[i+1];
+  e.updatedAt = new Date().toISOString();
+  await DB.put(e);
+  await Sync.send(e,'update');
+  await loadEntries();
+  render();
+}
+
+async function delEntry(id) {
+  if (!confirm('Delete this entry?')) return;
+  await DB.del(id);
+  await loadEntries();
+  toast('Deleted');
+  render();
+}
+
+// ─── TEMPLATES ────────────────────────────────────────────────────────────────
+const getTpls = () => DEFAULT_TPLS.map(t=>({...t, text: ls('ot_tpl_'+t.id)||t.text}));
+const saveTpl = (id,text) => ls('ot_tpl_'+id, text);
+const copyTpl = id => {
+  const ta = g('tpl-'+id);
+  navigator.clipboard.writeText(ta.value).then(()=>toast('Copied ✓')).catch(()=>{
+    ta.select(); document.execCommand('copy'); toast('Copied ✓');
+  });
+};
+
+// ─── STREAK ───────────────────────────────────────────────────────────────────
+function calcStreak() {
+  const byDay = {};
+  S.entries.forEach(e=>{ byDay[e.date]=(byDay[e.date]||0)+1; });
+  let streak=0, d=new Date();
+  // Check today first
+  if ((byDay[todayStr()]||0) >= DAILY()) streak=1;
+  // Check backwards from yesterday
+  d.setDate(d.getDate()-1);
+  while(true) {
+    const ds=d.toISOString().split('T')[0];
+    if((byDay[ds]||0)>=DAILY()){ streak++; d.setDate(d.getDate()-1); }
+    else break;
+    if(streak>365) break;
+  }
+  return streak;
+}
+
+function getWeeklyData() {
+  const weeks=[];
+  for(let i=3;i>=0;i--) {
+    const start=new Date(); start.setDate(start.getDate()-start.getDay()-(i*7)); start.setHours(0,0,0,0);
+    const end=new Date(start); end.setDate(end.getDate()+7);
+    const count=S.entries.filter(e=>{const d=new Date(e.date+'T00:00:00'); return d>=start&&d<end;}).length;
+    weeks.push({label: i===0?'This wk':`${i}w ago`, count});
+  }
+  return weeks;
+}
+
+// ─── RENDER ───────────────────────────────────────────────────────────────────
+function renderTabs() {
+  const fuC = followUpCount();
+  const tabs=[
+    ['add','➕','Add'],
+    ['pipeline','📋','Pipeline'],
+    ['dash','📊','Stats'],
+    ['tpl','📄','Templates'],
+    ['cfg','⚙️','Settings']
+  ];
+  g('tabs').innerHTML=tabs.map(([id,ic,lb])=>`
+    <button class="tb ${S.tab===id?'on':''}" onclick="S.tab='${id}';render()">
+      <i>${ic}</i><span>${lb}</span>
+      ${id==='pipeline'&&fuC?`<span class="tb-badge">${fuC}</span>`:''}
+    </button>`).join('');
+}
+
+function renderAdd() {
+  const today = todayEntries().length;
+  const week = weekEntries().length;
+  const dTarget = DAILY(), wTarget = WEEKLY();
+  const dHit = today >= dTarget;
+  g('cnt').innerHTML = `
+    <div class="cbar">
+      <div class="ci"><span class="ci-label">Today</span><span class="ci-val ${dHit?'hit':'mid'}">${today}/${dTarget}${dHit?' ✓':''}</span></div>
+      <div class="ci"><span class="ci-label">This week</span><span class="ci-val ${week>=wTarget?'hit':'mid'}">${week}/${wTarget}</span></div>
+    </div>
+    <div class="pd">
+      <div class="field">
+        <label>Contact name</label>
+        <input class="inp" id="add-name" placeholder="e.g. John Smith" autocomplete="off" autocorrect="off">
+      </div>
+      <div class="field">
+        <label>Platform</label>
+        <div class="gsel pf">
+          ${PLATFORMS.map(p=>`<button class="sbtn ${S.pf===p?'on':''}" onclick="S.pf='${p}';render()">${p}</button>`).join('')}
+        </div>
+      </div>
+      <div class="field">
+        <label>Type</label>
+        <div class="gsel ty">
+          ${TYPES.map(t=>`<button class="sbtn ${S.ty===t?'on':''}" onclick="S.ty='${t}';render()">${t}</button>`).join('')}
+        </div>
+      </div>
+      <div class="field">
+        <label>Note <span style="color:var(--dim);font-weight:400">(optional)</span></label>
+        <textarea class="inp" id="add-note" placeholder="Quick context..."></textarea>
+      </div>
+      <button class="btn-log ${dHit?'done':''}" onclick="addEntry(g('add-name').value,g('add-note').value)">
+        ${dHit?'✓ TARGET HIT — Log Another':'LOG IT →'}
+      </button>
+    </div>`;
+  // Restore focus if name was filled
+  const nameEl = g('add-name');
+  if (nameEl) nameEl.addEventListener('keydown', e => { if(e.key==='Enter'){ e.preventDefault(); g('add-note').focus(); }});
+}
+
+function renderPipeline() {
+  const filters = [
+    {id:'all', label:'All'},
+    {id:'followup', label:'⚠️ Follow-up'},
+    {id:'sent', label:'Sent'},
+    {id:'replied', label:'Replied'},
+    {id:'converted', label:'Converted'}
+  ];
+
+  let entries = [...S.entries];
+  switch(S.filter) {
+    case 'followup': entries=entries.filter(needsFollowUp); break;
+    case 'sent': entries=entries.filter(e=>e.status==='Sent'); break;
+    case 'replied': entries=entries.filter(e=>e.status==='Replied'||e.status==='Call Booked'); break;
+    case 'converted': entries=entries.filter(e=>e.status==='Converted'); break;
+  }
+
+  const cards = entries.map(e=>{
+    const fu=needsFollowUp(e), urg=isUrgent(e);
+    const days=daysBetween(e.date);
+    const bgCol=SCOLS[e.status]+'20', textCol=SCOLS[e.status];
+    return `<div class="entry ${urg?'ufu':fu?'fu':''}">
+      <div class="e-top">
+        <div class="e-name">${e.name}</div>
+        <button class="e-del" onclick="delEntry('${e.id}')">🗑</button>
+      </div>
+      <div class="e-meta">${e.platform} · ${e.type} · ${days===0?'today':days===1?'yesterday':days+'d ago'}</div>
+      ${e.note?`<div class="e-note">${e.note.replace(/</g,'&lt;')}</div>`:''}
+      <div class="e-bot">
+        <button class="schip" style="background:${bgCol};color:${textCol};border:1px solid ${textCol}40"
+          onclick="cycleStatus('${e.id}')" title="${e.status==='Dead'||e.status==='Converted'?'Final status':('→ '+STATUSES[STATUSES.indexOf(e.status)+1])}">
+          ${e.status}${e.status!=='Dead'&&e.status!=='Converted'?' →':''}
+        </button>
+        ${urg?`<span class="fu-flag" style="color:var(--red)">🔴 Final follow-up</span>`:fu?`<span class="fu-flag" style="color:var(--ylw)">⚠️ Follow up</span>`:''}
+      </div>
+    </div>`;
+  }).join('');
+
+  g('cnt').innerHTML = `
+    <div class="filters">
+      ${filters.map(f=>`<button class="fpill ${S.filter===f.id?'on':''}" onclick="S.filter='${f.id}';render()">${f.label}</button>`).join('')}
+    </div>
+    <div class="pd" style="padding-top:0">
+      ${entries.length?cards:`<div class="empty">No entries${S.filter!=='all'?' in this filter':''}.<br>Start logging from the + tab.</div>`}
+    </div>`;
+}
+
+function renderDash() {
+  const today=todayEntries().length, week=weekEntries().length;
+  const dTarget=DAILY(), wTarget=WEEKLY();
+  const total=S.entries.length;
+  const replied=S.entries.filter(e=>['Replied','Call Booked','Converted'].includes(e.status)).length;
+  const converted=S.entries.filter(e=>e.status==='Converted').length;
+  const streak=calcStreak();
+  const weekData=getWeeklyData();
+  const maxW=Math.max(...weekData.map(w=>w.count),wTarget);
+  const replyPct=total?Math.round(replied/total*100):0;
+  const convPct=total?Math.round(converted/total*100):0;
+
+  g('cnt').innerHTML=`
+    <div class="pd">
+      <div class="sec">This week</div>
+      <div class="prog-row">
+        <div class="prog-head"><span>Week</span><b>${week}/${wTarget}</b></div>
+        <div class="pbar"><div style="width:${Math.min(week/wTarget*100,100)}%;background:${week>=wTarget?'var(--grn)':'var(--ac)'}"></div></div>
+      </div>
+      <div class="prog-row">
+        <div class="prog-head"><span>Today</span><b>${today}/${dTarget}</b></div>
+        <div class="pbar"><div style="width:${Math.min(today/dTarget*100,100)}%;background:${today>=dTarget?'var(--grn)':'var(--ac)'}"></div></div>
+      </div>
+
+      <div class="sec" style="margin-top:16px">Performance</div>
+      <div class="stat-grid">
+        <div class="scard"><em style="color:${streak>=3?'var(--grn)':'var(--ac)'}">${streak}${streak>=3?' 🔥':''}</em><small>Day streak</small></div>
+        <div class="scard"><em style="color:var(--ac)">${total}</em><small>Total sent</small></div>
+        <div class="scard"><em style="color:var(--ylw)">${replyPct}%</em><small>Reply rate</small></div>
+        <div class="scard"><em style="color:var(--grn)">${convPct}%</em><small>Converted</small></div>
+      </div>
+
+      <div class="sec">History</div>
+      <div class="wbars">
+        ${weekData.map(w=>`
+          <div class="wbar">
+            <span class="wbar-label">${w.label}</span>
+            <div class="wbar-track"><div class="wbar-fill" style="width:${maxW?Math.max(w.count/maxW*100,w.count?2:0):0}%"></div></div>
+            <span class="wbar-num">${w.count}</span>
+          </div>`).join('')}
+      </div>
+    </div>`;
+}
+
+function renderTemplates() {
+  const tpls=getTpls();
+  g('cnt').innerHTML=`
+    <div class="pd">
+      <div class="sec">Templates — tap to edit, copy to clipboard</div>
+      ${tpls.map(t=>`
+        <div class="tpl">
+          <div class="tpl-hdr">
+            <span class="tpl-label">${t.label}</span>
+            <button class="tpl-copy" onclick="copyTpl('${t.id}')">Copy</button>
+          </div>
+          <textarea class="tpl-text" rows="5" id="tpl-${t.id}" oninput="saveTpl('${t.id}',this.value)">${t.text}</textarea>
+        </div>`).join('')}
+    </div>`;
+}
+
+function renderSettings() {
+  const wh=ls('ot_webhook')||'';
+  const daily=ls('ot_daily')||'3';
+  const weekly=ls('ot_weekly')||'21';
+  g('cnt').innerHTML=`
+    <div class="pd">
+      <div class="sec">Sync</div>
+      <div class="srow">
+        <span class="srow-label">n8n Webhook URL</span>
+        <input class="srow-inp" id="cfg-wh" type="url" placeholder="https://your-n8n.cloud/webhook/..." value="${wh}" oninput="ls('ot_webhook',this.value);updateSyncStatus()">
+      </div>
+      <div style="font-size:11px;color:var(--dim);margin-bottom:20px;line-height:1.7">
+        Every log + status update fires a POST to this URL with <code style="color:var(--ac)">action, name, platform, type, date, status, note</code>.
+        Offline entries queue and sync automatically when back online.
+      </div>
+
+      <div class="sec">Targets</div>
+      <div class="srow" style="display:flex;align-items:center;justify-content:space-between">
+        <span class="srow-label" style="margin:0">Daily target</span>
+        <input class="srow-inp" type="number" min="1" max="20" style="width:60px;text-align:right" value="${daily}" oninput="ls('ot_daily',this.value);render()">
+      </div>
+      <div class="srow" style="display:flex;align-items:center;justify-content:space-between">
+        <span class="srow-label" style="margin:0">Weekly target</span>
+        <input class="srow-inp" type="number" min="1" max="100" style="width:60px;text-align:right" value="${weekly}" oninput="ls('ot_weekly',this.value);render()">
+      </div>
+
+      <div class="sec" style="margin-top:16px">Manual sync</div>
+      <button class="srow" style="width:100%;text-align:left;cursor:pointer" onclick="Sync.flush().then(()=>render())">
+        <span class="srow-label" style="margin:0;color:var(--ac)">Flush offline queue</span>
+        <div style="font-size:12px;color:var(--dim);margin-top:4px">${JSON.parse(ls('ot_queue')||'[]').length} entries queued</div>
+      </button>
+
+      <div class="sec" style="margin-top:16px;color:var(--red)">Danger zone</div>
+      <button class="btn-danger" onclick="clearAll()">Clear all local data</button>
+    </div>`;
+}
+
+async function clearAll() {
+  if (!confirm('Delete ALL outreach data? This cannot be undone.')) return;
+  const entries = await DB.getAll();
+  for (const e of entries) await DB.del(e.id);
+  await loadEntries();
+  toast('All data cleared');
+  render();
+}
+
+function render() {
+  renderTabs();
+  updateSyncStatus();
+  switch(S.tab) {
+    case 'add': renderAdd(); break;
+    case 'pipeline': renderPipeline(); break;
+    case 'dash': renderDash(); break;
+    case 'tpl': renderTemplates(); break;
+    case 'cfg': renderSettings(); break;
+  }
+}
+
+// ─── INIT ─────────────────────────────────────────────────────────────────────
+async function init() {
+  await DB.init();
+  await loadEntries();
+  window.addEventListener('online', async () => { await Sync.flush(); render(); });
+  window.addEventListener('offline', () => render());
+  if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js').catch(()=>{});
+  render();
+}
+
+init();
+</script>
+</body>
+</html>
